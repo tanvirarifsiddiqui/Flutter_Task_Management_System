@@ -37,6 +37,7 @@ dependencies:
   get:                       # state management & navigation
   http:                   # REST API client
   shared_preferences:      # local key-value storage
+  intl:
 
 
 dev_dependencies:

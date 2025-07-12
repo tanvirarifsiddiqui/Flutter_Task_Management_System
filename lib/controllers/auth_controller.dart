@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crud_practice_with_laravel/controllers/task_controller.dart';
 import 'package:crud_practice_with_laravel/models/user.dart';
 import 'package:crud_practice_with_laravel/routes/route_helper.php.dart';
 import 'package:crud_practice_with_laravel/services/auth_services.dart';
@@ -31,11 +32,19 @@ class AuthController extends GetxController{
     update();
   }
 
+  void _injectDependency(){
+    // ✅ Register TaskController only after token is available
+    Get.put(TaskController(token!)); //dependency injection
+  }
+
 
   void _handleLogin(http.Response response){
     final data = jsonDecode(response.body);
     user = UserModel.fromJson(data["user"]);
     token = data['token'];
+
+    _injectDependency();
+
     Get.offAllNamed(RouteHelper.home);
     prefs.setString("token", token!);
   }
@@ -72,6 +81,7 @@ class AuthController extends GetxController{
     final storedToken = prefs.getString("token");
     if(storedToken != null){
       token = storedToken;
+      _injectDependency();
     fetchUserInfo();
     }
   }

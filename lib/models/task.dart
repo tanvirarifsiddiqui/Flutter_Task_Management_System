@@ -4,7 +4,7 @@ class TaskModel {
   String? title;
   String? description;
   String? status;
-  Null? dueDate;
+  String? dueDate;
   int? priority;
   String? createdAt;
   String? updatedAt;
