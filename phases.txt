@@ -1,0 +1,112 @@
+Phase 1: Environment Setup
+- Install Laravel 12
+- PHP 8.1+, Composer
+- composer create-project laravel/laravel:^12 your_api
+- Configure database (MySQL/PostgreSQL) in .env
+- Install Flutter SDK and IDE (Android Studio/Xcode)
+- Initialize Git repository
+- Add .gitignore for Laravel & Flutter
+- Make initial commit
+Deliverables
+- Laravel 12 API running (php artisan serve)
+- Flutter scaffold created (flutter create your_app)
+- Git repo with initial commit
+
+Phase 2: Sanctum Authentication in Laravel
+- Require and publish Sanctum
+- composer require laravel/sanctum
+- php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+- Run migrations for personal_access_tokens
+- Add EnsureFrontendRequestsAreStateful in api middleware group
+- Create Auth controllers & routes
+- /api/register → register & issue token
+- /api/login → login & issue token
+- /api/logout → revoke token
+- Use Form Requests for payload validation
+- Tweak CORS and Sanctum settings in config/sanctum.php & config/cors.php
+Deliverables
+- Auth endpoints working and protected
+- Sanctum guarding /api/user
+- Postman collection with tested auth flows
+
+Phase 3: CRUD API Endpoints in Laravel
+- php artisan make:model Task -mfs (model, migration, factory, seeder)
+- Define table schema, run php artisan migrate
+- Create RESTful TaskController
+- index, show, store, update, destroy
+- Use API Resources for consistent JSON format
+- Protect all /api/tasks routes with Sanctum middleware
+- Write PHPUnit feature tests (happy paths)
+Deliverables
+- Full CRUD at /api/tasks
+- Well-formed API Resource responses
+- PHPUnit tests passing
+
+Phase 4: Flutter Project Structure & Dependencies
+- Define folder layout under lib/:
+- models/, services/, controllers/, views/, widgets/
+- Add dependencies to pubspec.yaml:
+- get: <latest>
+- http: <latest>
+- shared_preferences: <latest>
+- Skip json_serializable & build_runner—use your preferred online JSON-to-Dart tool
+- No flutter_dotenv or env files: create a Dart ApiConstants class for base URLs, endpoints, keys
+- Generate a sample Task model manually from JSON
+Deliverables
+- Clean, modular folder structure
+- http, get, and shared_preferences ready
+- ApiConstants.dart with all endpoints
+- Example Task model class
+
+Phase 5: Authentication Flow in Flutter with GetX
+- Create AuthController extends GetxController
+- Rx variables: User? user, bool isLoading
+- Build login & register views using Flutter forms
+- Use GetBuilder<AuthController> to react to state changes
+- Use http package to hit /api/register & /api/login
+- Store token in SharedPreferences on successful login
+- On app start, read token, if present fetch /api/user and populate user
+- Implement logout: clear token from SharedPreferences, reset user
+Deliverables
+- Signup/login screens wired to AuthController
+- Stateless redirects based on auth state (via GetBuilder)
+- Secure token persistence in SharedPreferences
+
+Phase 6: Implementing CRUD UI & Logic with GetX
+- Create TaskController extends GetxController
+- List state: List<Task> tasks, bool isLoading
+- Views (using GetBuilder<TaskController>):
+- Task list screen
+- Task creation form
+- Task detail & edit screen
+- Use http to call /api/tasks endpoints (GET, POST, PUT, DELETE)
+- Show CircularProgressIndicator when isLoading is true
+- Display SnackBar for errors and confirmations
+Deliverables
+- Reactive CRUD UI powered by TaskController
+- All network logic inside controllers
+- User feedback on each operation
+
+Phase 7: Testing, Optimization & Deployment
+- Write Flutter widget and integration tests
+- Test auth flow, task list and CRUD operations
+- Optimize API calls and caching logic if needed
+- Profile UI for jank and slow frames
+- Prepare Flutter for production
+- Android keystore signing
+- iOS provisioning profiles
+- Deploy Laravel API
+- Configure CORS and Sanctum for your production domain
+- Use Forge, Vapor, or traditional VPS
+- Publish Flutter builds to Play Store / App Store or distribute via TestFlight/Firebase App Distribution
+Deliverables
+- Comprehensive test suites passing
+- Production-grade Flutter binaries
+- Live Laravel 12 API supporting your mobile app
+
+I am building the project for mobile. Give the response for server Creation please remember it
+
+
+In Android Emulator, localhost refers to the emulator itself, not your host machine.
+
+Flutter running in the emulator tries to connect to localhost, but it ends up looking for a server inside the emulator, not your Laravel server on your PC.
