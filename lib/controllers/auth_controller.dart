@@ -16,6 +16,7 @@ class AuthController extends GetxController{
   UserModel? user;
   String? token;
 
+
   //getting shared preference instance from main function
   final SharedPreferences prefs;
   AuthController(this.prefs);
@@ -110,6 +111,7 @@ class AuthController extends GetxController{
         await prefs.remove("token");
         user = null;
         token = null;
+        Get.delete<TaskController>(force: true);
         Get.offAllNamed(RouteHelper.login);
       }
     }catch(e){
