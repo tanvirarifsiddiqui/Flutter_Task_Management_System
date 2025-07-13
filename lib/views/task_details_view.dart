@@ -1,14 +1,19 @@
-import 'package:crud_practice_with_laravel/controllers/task_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:crud_practice_with_laravel/models/task.dart';
+import '../controllers/task_controller.dart';
+import '../models/task.dart';
+import '../utils/app_colors.dart';
+import '../widgets/task_details_widgets.dart';
 
 class TaskEditDetailsView extends StatefulWidget {
   final TaskModel task;
-  int index;
-  TaskEditDetailsView({Key? key, required this.task, required this.index})
-    : super(key: key);
+  final int index;
+
+  const TaskEditDetailsView({
+    Key? key,
+    required this.task,
+    required this.index,
+  }) : super(key: key);
 
   @override
   _TaskEditDetailsViewState createState() => _TaskEditDetailsViewState();
@@ -17,8 +22,6 @@ class TaskEditDetailsView extends StatefulWidget {
 class _TaskEditDetailsViewState extends State<TaskEditDetailsView> {
   bool _isEditing = false;
   final _formKey = GlobalKey<FormState>();
-
-  // final taskController = Get.find<TaskController>();
 
   late TextEditingController _titleCtrl;
   late TextEditingController _descCtrl;
@@ -29,14 +32,11 @@ class _TaskEditDetailsViewState extends State<TaskEditDetailsView> {
   @override
   void initState() {
     super.initState();
-
-    _titleCtrl = TextEditingController(text: widget.task.title);
-    _descCtrl = TextEditingController(text: widget.task.description);
-    _dueDateCtrl = TextEditingController(text: widget.task.dueDate);
-    _statusCtrl = TextEditingController(text: widget.task.status);
-    _priorityCtrl = TextEditingController(
-      text: widget.task.priority.toString(),
-    );
+    _titleCtrl = TextEditingController(text: widget.task.title ?? '');
+    _descCtrl = TextEditingController(text: widget.task.description ?? '');
+    _dueDateCtrl = TextEditingController(text: widget.task.dueDate ?? '');
+    _statusCtrl = TextEditingController(text: widget.task.status ?? 'pending');
+    _priorityCtrl = TextEditingController(text: widget.task.priority?.toString() ?? '1');
   }
 
   @override
@@ -49,189 +49,105 @@ class _TaskEditDetailsViewState extends State<TaskEditDetailsView> {
     super.dispose();
   }
 
-  String _formatDate(String? raw) {
-    if (raw == null) return '—';
-    return DateFormat.yMMMMd().format(DateTime.parse(raw));
-  }
-
-  void _toggleEdit() {
-    setState(() => _isEditing = !_isEditing);
-  }
-
-  Future<void> _saveChanges() async {
-
-  }
+  void _toggleEdit() => setState(() => _isEditing = !_isEditing);
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<TaskController>(
-      builder: (taskController) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(_isEditing ? 'Edit Task' : 'Task Details'),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: () {
-                  taskController.deleteTask(widget.task.id!, widget.index);
-                  Get.back();
-                },
-                icon: Icon(Icons.delete),
-              ),
-              IconButton(
-                icon: Icon(_isEditing ? Icons.save : Icons.edit_outlined),
-                onPressed: _isEditing ? (){
-                  if (_formKey.currentState!.validate()) return;
+    final taskController = Get.find<TaskController>();
 
-                  taskController.updateTask(
-                    widget.index,
-                    widget.task.id!,
-                    _titleCtrl.text,
-                    _descCtrl.text,
-                    _statusCtrl.text,
-                    _dueDateCtrl.text,
-                    int.parse(_priorityCtrl.text),
-                  );
-
-                  // On success, update local widget.task and exit edit mode:
-                  setState(() {
-                    widget.task.title = _titleCtrl.text;
-                    widget.task.description = _descCtrl.text;
-                    widget.task.dueDate = _dueDateCtrl.text;
-                    widget.task.status = _statusCtrl.text;
-                    widget.task.priority = int.parse(_priorityCtrl.text);
-                    _isEditing = false;
-                  });
-                } : _toggleEdit,
-              ),
-              if (_isEditing)
-                IconButton(icon: const Icon(Icons.close), onPressed: _toggleEdit),
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: _isEditing ? _buildEditForm() : _buildDetailView(),
-          ),
-        );
-      }
-    );
-  }
-
-  Widget _buildDetailView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _detailCard(Icons.title, 'Title', widget.task.title ?? '—'),
-        _detailCard(
-          Icons.description_outlined,
-          'Description',
-          widget.task.description ?? 'No description',
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.surface),
+        title: Text(
+          _isEditing ? 'Edit Task' : 'Task Details',
+          style: TextStyle(color: AppColors.surface),
         ),
-        _detailCard(
-          Icons.calendar_today_outlined,
-          'Due Date',
-          _formatDate(widget.task.dueDate),
-        ),
-        _detailCard(Icons.flag_outlined, 'Status', widget.task.status!),
-        _detailCard(
-          Icons.priority_high,
-          'Priority',
-          widget.task.priority.toString(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEditForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _titleCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              prefixIcon: Icon(Icons.title),
-            ),
-            validator: (v) =>
-                v == null || v.isEmpty ? 'Title cannot be empty' : null,
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? Icons.check : Icons.edit),
+            onPressed: _isEditing ? _saveChanges(taskController) : _toggleEdit,
           ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _descCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              prefixIcon: Icon(Icons.description_outlined),
+          if (_isEditing)
+            IconButton(
+              icon: Icon(Icons.close),
+              onPressed: _toggleEdit,
             ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _dueDateCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Due Date (YYYY-MM-DD)',
-              prefixIcon: Icon(Icons.calendar_today_outlined),
-            ),
-            validator: (v) {
-              if (v == null || v.isEmpty) return null;
-              try {
-                DateTime.parse(v);
-                return null;
-              } catch (_) {
-                return 'Invalid date format';
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _statusCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Status',
-              prefixIcon: Icon(Icons.flag_outlined),
-            ),
-            validator: (v) =>
-                v != null && ['pending', 'in_progress', 'completed'].contains(v)
-                ? null
-                : 'Use pending, in_progress, or completed',
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _priorityCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Priority',
-              prefixIcon: Icon(Icons.priority_high),
-            ),
-            keyboardType: TextInputType.number,
-            validator: (v) {
-              if (v == null || v.isEmpty) return 'Priority required';
-              final num? n = int.tryParse(v);
-              if (n == null || n < 1) return 'Minimum priority is 1';
-              return null;
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              taskController.deleteTask(widget.task.id ?? 0, widget.index);
+              Get.back();
             },
           ),
         ],
       ),
-    );
-  }
-
-  Widget _detailCard(IconData icon, String label, String content) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(content, style: const TextStyle(fontSize: 16)),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.accent, AppColors.primary],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 400),
+                  child: _isEditing
+                      ? TaskEditForm(
+                    formKey: _formKey,
+                    titleCtrl: _titleCtrl,
+                    descCtrl: _descCtrl,
+                    dueDateCtrl: _dueDateCtrl,
+                    statusCtrl: _statusCtrl,
+                    priorityCtrl: _priorityCtrl,
+                  )
+                      : TaskDetailView(task: widget.task),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
-}
 
-extension StringExtension on String {
-  String get capitalizeFirst =>
-      '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  VoidCallback _saveChanges(TaskController taskController) {
+    return () {
+      if (!_formKey.currentState!.validate()) return;
+
+      final title = _titleCtrl.text.trim().isNotEmpty ? _titleCtrl.text.trim() : 'Untitled';
+      final desc = _descCtrl.text.trim();
+      final due = _dueDateCtrl.text.trim();
+      final status = _statusCtrl.text.trim();
+      final priority = int.tryParse(_priorityCtrl.text) ?? 1;
+
+      taskController.updateTask(
+        widget.index,
+        widget.task.id ?? 0,
+        title,
+        desc,
+        status,
+        due,
+        priority,
+      );
+
+      setState(() {
+        widget.task.title = title;
+        widget.task.description = desc;
+        widget.task.dueDate = due;
+        widget.task.status = status;
+        widget.task.priority = priority;
+        _isEditing = false;
+      });
+    };
+  }
 }

@@ -38,6 +38,7 @@ dependencies:
   http:                   # REST API client
   shared_preferences:      # local key-value storage
   intl:
+  shimmer: ^2.0.0
 
 
 dev_dependencies:
